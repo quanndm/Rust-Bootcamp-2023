@@ -71,11 +71,10 @@ fn exercise5() {
     let key = 3;
 
     let res = match my_map.get(&key) {
-        Some(child) => child.to_string(),
+        Some(child) => child.to_owned(),
         None => {
             let value = "3.0".to_string();
-            my_map.insert(key, value.to_owned());
-            value.to_owned() // HERE IT FAILS
+            my_map.insert(key, value.to_owned()).unwrap()
         }
     };
 
