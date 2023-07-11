@@ -1,18 +1,25 @@
 // Exercise 1
 // Fill in the blank and fix the errors
 // Make it compile
+#[allow(dead_code)]
 enum MessageOne {
     Quit,
     Move { x: i32, y: i32 },
     Write(String),
     ChangeColor(i32, i32, i32),
 }
+#[allow(dead_code)]
 fn show_message(msg: MessageOne) {
-    println!("{}", msg);
+    println!("{}", match msg {
+        MessageOne::Quit => "Quit".to_owned(),
+        MessageOne::Move { .. } => "Move".to_owned(),
+        MessageOne::Write(s) => s.to_owned(),
+        MessageOne::ChangeColor(_, _, _) => "Change color".to_owned(),
+    });
 }
-
+#[allow(dead_code)]
 fn exercise1() {
-    let msgs: __ = [
+    let msgs: [MessageOne; 3] = [
         MessageOne::Quit,
         MessageOne::Move { x: 1, y: 3 },
         MessageOne::ChangeColor(255, 255, 0),
@@ -27,21 +34,28 @@ fn exercise1() {
 // Fill in the blank and fix the errors
 // Make it compile
 // Run tests
+#[allow(dead_code)]
 enum Message {
     // TODO: implement the message variant types based on their usage below
+    Quit,
+    Move(Point),
+    Echo(String),
+    ChangeColor(u8, u8, u8),
 }
 
+#[allow(dead_code)]
 struct Point {
     x: u8,
     y: u8,
 }
-
+#[allow(dead_code)]
 struct State {
     color: (u8, u8, u8),
     position: Point,
     quit: bool,
 }
 
+#[allow(dead_code)]
 impl State {
     fn change_color(&mut self, color: (u8, u8, u8)) {
         self.color = color;
@@ -62,6 +76,22 @@ impl State {
     fn process(&mut self, message: Message) {
         // TODO: create a match expression to process the different message variants
         // Remember: When passing a tuple as a function argument, you'll need extra parentheses: fn function((t, u, p, l, e))
+        match message {
+            Message::Quit => {
+                self.quit();
+                self.echo(String::from("Quit"));
+            },
+            Message::Move(Point{x, y}) => {
+                self.move_position(Point{x, y});
+                self.echo(String::from("Move"));
+            },
+            Message::Echo(s) => self.echo(s),
+            Message::ChangeColor(a, b, c) => {
+                self.change_color((a, b, c));
+                self.echo(String::from("Change color"));
+            },
+        };
+        
     }
 }
 
@@ -69,6 +99,7 @@ impl State {
 // Exercise 3
 // Fix the errors
 // Run tests
+#[derive(PartialEq, Eq, Debug)]
 enum Direction {
     North,
     East,
@@ -77,9 +108,13 @@ enum Direction {
 }
 
 impl Direction {
+    #[allow(dead_code)]
     fn opposite(&self) -> Direction {
         match self {
-            //TODO
+            Direction::North =>  Direction::South,
+            Direction::East => Direction::West,
+            Direction::South => Direction::North,
+            Direction::West => Direction::East,
         }
     }
 }
@@ -89,6 +124,7 @@ impl Direction {
 // Implement logic :
 // Run tests
 // Enum representing arithmetic operations
+#[allow(dead_code)]
 enum Operation {
     Add,
     Subtract,
@@ -97,9 +133,13 @@ enum Operation {
 }
 
 // Perform arithmetic operations
+#[allow(dead_code)]
 fn perform_operation(operation: Operation, num1: f64, num2: f64) -> f64 {
     match operation {
-        // TODO
+        Operation::Add => num1 + num2,
+        Operation::Subtract => num1 - num2,
+        Operation::Multiply => num1 * num2,
+        Operation::Divide => num1 / num2,
     }
 }
 

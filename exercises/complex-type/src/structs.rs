@@ -2,11 +2,13 @@
 // Fix the error
 // Make it compile
 // Run test
+#[derive(PartialEq, Debug)]
 struct Person {
     name: String,
     age: u8,
     hobby: String
 }
+#[allow(dead_code)]
 fn exercise1() -> Person {
     let age = 30;
     // Hobby = Rust 
@@ -25,12 +27,14 @@ fn exercise1() -> Person {
 // Run test
 
 // Define the struct
+#[allow(dead_code)]
 struct Agent  {
     name: String,
     age: u32,
 }
 
 // Implementation of methods for the Person struct
+#[allow(dead_code)]
 impl Agent {
     // Create a new Person instance
     fn new(name: String, age: u32) -> Agent {
@@ -39,12 +43,12 @@ impl Agent {
 
     // Get the name of the person
     fn get_name(&self) -> &str {
-        todo!()
+        &self.name
     }
 
     // Get the age of the person
     fn get_age(&self) -> u32 {
-        todo!()
+        self.age
     }
 }
 
@@ -52,51 +56,53 @@ impl Agent {
 // Fix the error
 // Make it compile
 // Run test
+#[allow(dead_code)]
 struct Calculator {
     value: i32,
 }
-
+#[allow(dead_code)]
 impl Calculator {
     fn new() -> Self {
         Calculator { value: 0 }
     }
 
-    fn add(&self, num: i32) {
+    fn add(&mut self, num: i32) {
         self.value += num;
     }
 
-    fn subtract(mut self, num: i32) {
+    fn subtract(&mut self, num: i32) {
         self.value -= num;
     }
-    fn clear(self) {
+    fn clear(&mut self) {
         self.value = 0;
     }
 
-    fn get_value(self) -> i32 {
+    fn get_value(&self) -> i32 {
         self.value
     }
 }
 
 // Exercise 4
 // Make it compile
+#[allow(dead_code)]
 #[derive(Debug)]
 struct User {
     first: String,
     last: String,
     age: u32,
 }
-
+#[allow(dead_code)]
 fn exercise4() {
     let u1 = User {
         first: String::from("John"),
         last: String::from("Doe"),
         age: 22,
     };
-
-    let u2 = User {
+    
+    let _u2 = User {
         first: String::from("Mary"),
+        last: u1.last.to_owned(),
         ..u1
-        
     };
 
     println!("user: {:#?}", u1);
@@ -105,11 +111,12 @@ fn exercise4() {
 
 // Exercise 5
 // Make it compile
+#[allow(dead_code)]
 struct Foo {
     str_val: String,
     int_val: i32,
 }
-
+#[allow(dead_code)]
 fn exercise5() {
     let mut foos = Vec::new();
     foos.push(Foo {
@@ -122,10 +129,10 @@ fn exercise5() {
     });
 
     
-    let moved = foos[0];
+    let _moved = foos.get(0).unwrap();
 
     
-    let moved_field = foos[0].str_val;
+    let _moved_field = foos.get(0).unwrap();
 }
 
 // Exercise 6
@@ -141,6 +148,7 @@ struct Package {
 }
 
 impl Package {
+    #[allow(dead_code)]
     fn new(sender_country: String, recipient_country: String, weight_in_grams: i32) -> Package {
         if weight_in_grams <= 0 {
             panic!("Can not ship a weightless package.")
@@ -152,13 +160,15 @@ impl Package {
             }
         }
     }
-
-    fn is_international(&self) -> ??? {
+    #[allow(dead_code)]
+    fn is_international(&self) -> bool {
         // Something goes here...
+        self.sender_country != self.recipient_country
     }
-
-    fn get_fees(&self, cents_per_gram: i32) -> ??? {
+    #[allow(dead_code)]
+    fn get_fees(&self, cents_per_gram: i32) -> i32 {
         // Something goes here...
+        self.weight_in_grams * cents_per_gram
     }
 }
 
