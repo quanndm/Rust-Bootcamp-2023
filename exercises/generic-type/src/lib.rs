@@ -1,24 +1,30 @@
+
 // Exercise 1 
 // Implement struct Point to make it work.
 // Make it compile
+#[allow(dead_code)]
 fn exercise1() {
-    let integer = Position { x: 5, y: 10 };
-    let float = Position { x: 1.0, y: 4.0 };
+    let _integer = Position { x: 5, y: 10 };
+    let _float = Position { x: 1.0, y: 4.0 };
 }
-
-
+#[allow(dead_code)]
+struct Position<T>{
+    x: T,
+    y: T
+}
 
 // Exercise 2
 // Modify this struct to make the code work
 // Make it compile
-struct Point<T> {
+#[allow(dead_code)]
+struct Point<T, U> {
     x: T,
-    y: T,
+    y: U,
 }
-
+#[allow(dead_code)]
 fn exercise2() {
     // DON'T modify this code.
-    let p = Point{x: 5, y : "hello".to_string()};
+    let _p = Point{x: 5, y : "hello".to_string()};
 }
 
 
@@ -26,17 +32,18 @@ fn exercise2() {
 // Exercise 3
 // Make it compile
 // Add generic for Val to make the code work, DON'T modify the code in `main`.
-struct Val {
-    val: f64,
+#[allow(dead_code)]
+struct Val<T> {
+    val: T,
 }
-
-impl Val {
-    fn value(&self) -> &f64 {
+#[allow(dead_code)]
+impl<T> Val<T> {
+    fn value(&self) -> &T {
         &self.val
     }
 }
 
-
+#[allow(dead_code)]
 fn exercise3() {
     let x = Val{ val: 3.0 };
     let y = Val{ val: "hello".to_string()};
@@ -48,24 +55,42 @@ fn exercise3() {
 // Make it compile
 // Implementing logic
 // Run tests
-
-fn find_max<T>(collection: &[T]) -> Option<&T> {
-    todo!()
+#[allow(dead_code)]
+fn find_max<T: Ord>(collection: &[T]) -> Option<&T> {
+    let len = &collection.len();
+    if *len == 0 {
+        return None
+    }
+    let mut max_val_index:usize = 0;
+    collection.into_iter().enumerate().for_each(|(i, x)| {
+        if x > collection.get(max_val_index).unwrap()  {
+            max_val_index = i; 
+        }
+    });
+    collection.get(max_val_index)
 }
 
 // Exercise 5 
 // Reverse the elements in a collection
 // Make it compile 
 // Run tests 
-fn reverse_collection<T>(collection: &[T]) {
-    todo!()
+#[allow(dead_code)]
+fn reverse_collection<T>(collection: &mut [T]) {
+    collection.reverse()
 }
 
 
 // Exercise 6
 // Function to check if a collection contains a specific value
-fn contains_value<T>(collection: &[T], value: &T) -> bool {
-    todo!()
+#[allow(dead_code)]
+fn contains_value<T: Ord>(collection: &[T], value: &T) -> bool {
+    let mut check: bool = false;
+    collection.into_iter().for_each(|x| {
+        if *x == *value {
+            check = true;
+        }
+    });
+    check
 }
 
 // Unit tests
