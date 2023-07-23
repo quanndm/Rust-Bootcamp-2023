@@ -2,9 +2,12 @@
 //! The atm may fail to give you cash if it is empty or you haven't swiped your card, or you have
 //! entered the wrong pin.
 
+
 use crate::traits::StateMachine;
+use crate::traits::hash;
 
 /// The keys on the ATM keypad
+#[derive(PartialEq, Debug, Hash, Clone)]
 pub enum Key {
     One,
     Two,
@@ -17,6 +20,7 @@ pub enum Key {
 
 
 /// Something you can do to the ATM
+#[warn(dead_code)]
 pub enum Action {
     /// Swipe your card at the ATM. The attached value is the hash of the pin
     /// that should be keyed in on the keypad next.
@@ -26,6 +30,7 @@ pub enum Action {
 }
 
 /// The various states of authentication possible with the ATM
+#[derive(PartialEq, Debug, Clone)]
 enum Auth {
     /// No session has begun yet. Waiting for the user to swipe their card
     Waiting,
@@ -46,6 +51,7 @@ enum Auth {
 /// and the ATM automatically goes back to the main menu. If your pin is correct,
 /// the ATM waits for you to key in an amount of money to withdraw. Withdraws
 /// are bounded only by the cash in the machine (there is no account balance).
+#[derive(PartialEq, Debug, Clone)]
 pub struct Atm {
     /// How much money is in the ATM
     cash_inside: u64,
@@ -60,27 +66,104 @@ pub struct Atm {
 // Implement trait Default for Auth 
 // return Waiting status 
 impl Default for Auth {
-    
+    fn default() -> Self {
+        Self::Waiting
+    }
 }
 
 
 //TODO
 // Implement trait From  for &str
 // Convert  elements in Key to &str
-impl From<Key> for &str {
+impl From<Key> for String{
+    fn from(value: Key) -> Self {
+        match value {
+            Key::One => "1".to_owned(),
+            Key::Two => "2".to_owned(),
+            Key::Three => "3".to_owned(),
+            Key::Four => "4".to_owned(),
+            Key::Enter => "enter".to_owned(),
+        }
+    }
 }
 
 impl StateMachine for Atm {
     // Notice that we are using the same type for the state as we are using for the machine this time.
-    type State;
-    type Transition;
+    type State = Atm;
+    type Transition = self::Action;
     // Hint
     // Should use `default` method when auth status is Waiting status
     // Should use `from` method to convert  elements in Key to &str
     // Parse &str to integer to calculate amount
     // Use a hash function to verify the PIN both before and after the user presses the Enter key.
     fn next_state(starting_state: &Self::State, t: &Self::Transition) -> Self::State {
-        todo!("Final project")
+        match t {
+            Action::SwipeCard(key_hashed) => {
+                if starting_state.expected_pin_hash == Auth::Waiting {
+                    return Self {
+                        expected_pin_hash: Auth::Authenticating(*key_hashed),
+                        ..starting_state.clone()
+                    };
+                }
+                return starting_state.clone()
+            },
+            Action::PressKey(key) => {
+                if *key == Key::Enter {
+                    match starting_state.expected_pin_hash {
+                        Auth::Waiting => {
+                            return Self {
+                                cash_inside: starting_state.cash_inside,
+                                expected_pin_hash: Auth::default(),
+                                keystroke_register: Vec::new()
+                            };
+                        },
+                        Auth::Authenticating(key_curent_hashed) => {
+                            let input_key = hash(&starting_state.keystroke_register);
+                            if input_key == key_curent_hashed {
+                                return Self {
+                                    cash_inside: starting_state.cash_inside,
+                                    expected_pin_hash: Auth::Authenticated,
+                                    keystroke_register: Vec::new()
+                                };
+                            }
+                            return Self {
+                                cash_inside: starting_state.cash_inside,
+                                expected_pin_hash: Auth::default(),
+                                keystroke_register: Vec::new()
+                            };
+                        },
+                        Auth::Authenticated => {
+                            let num = &starting_state.keystroke_register.to_vec().into_iter().map(|element| String::from(element)).collect::<String>().clone().parse::<u64>().unwrap_or(0);
+                            if starting_state.cash_inside < *num {
+                                return Self { 
+                                    cash_inside: starting_state.cash_inside,
+                                    expected_pin_hash: Auth::default(),
+                                    keystroke_register: Vec::new()
+                                };
+                            }else{
+                                return Self {
+                                    cash_inside: starting_state.cash_inside.clone() - *num,
+                                    expected_pin_hash : Auth::default(),
+                                    keystroke_register: Vec::new()
+                                };
+                            }
+                        },
+                    }
+                }else{
+                    if starting_state.expected_pin_hash == Auth::Waiting {
+                        return starting_state.clone();
+                    }
+                    let mut new_keystroke = starting_state.keystroke_register.clone();
+                    new_keystroke.push(key.clone());
+
+                    return Self {
+                        cash_inside: starting_state.cash_inside,
+                        expected_pin_hash: starting_state.expected_pin_hash.clone(),
+                        keystroke_register: new_keystroke
+                    }
+                }
+            },
+        }
     }
 }
 
@@ -184,7 +267,7 @@ fn sm_3_enter_single_digit_of_pin() {
 fn sm_3_enter_wrong_pin() {
     // Create hash of pin
     let pin = vec![Key::One, Key::Two, Key::Three, Key::Four];
-    let pin_hash = crate::hash(&pin);
+    let pin_hash = hash(&pin);
 
     let start = Atm {
         cash_inside: 10,
@@ -205,7 +288,7 @@ fn sm_3_enter_wrong_pin() {
 fn sm_3_enter_correct_pin() {
     // Create hash of pin
     let pin = vec![Key::One, Key::Two, Key::Three, Key::Four];
-    let pin_hash = crate::hash(&pin);
+    let pin_hash = hash(&pin);
 
     let start = Atm {
         cash_inside: 10,
